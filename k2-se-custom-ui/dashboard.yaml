@@ -1,0 +1,218 @@
+---
+# K2 SE Custom Dashboard Layout
+# Optimized for DXC Extruder Configuration
+
+dashboard:
+  name: "K2 SE DXC Control Panel"
+  version: "1.0"
+  description: "Custom UI for Creality K2 SE with DXC Extruder"
+
+layout:
+  primary_grid:
+    rows: 4
+    cols: 4
+    gap: 10
+
+sections:
+  - id: "header"
+    type: "status_bar"
+    position: [0, 0, 4, 1]
+    widgets:
+      - printer_status
+      - temperature_display
+      - print_progress
+      - connection_status
+
+  - id: "extruder_dual_control"
+    type: "panel"
+    position: [0, 1, 2, 2]
+    title: "DXC Extruder Control"
+    widgets:
+      - extruder_0_temp
+      - extruder_0_speed
+      - extruder_1_temp
+      - extruder_1_speed
+      - extruder_selector
+      - filament_runout_status
+
+  - id: "bed_control"
+    type: "panel"
+    position: [2, 1, 2, 2]
+    title: "Bed & Nozzle"
+    widgets:
+      - bed_temperature
+      - nozzle_heater_status
+      - bed_leveling_quick
+      - mesh_bed_leveling_toggle
+
+  - id: "movement_control"
+    type: "panel"
+    position: [0, 3, 2, 1]
+    title: "Quick Movement"
+    widgets:
+      - home_all_btn
+      - home_xy_btn
+      - home_z_btn
+      - move_up
+      - move_down
+
+  - id: "print_control"
+    type: "panel"
+    position: [2, 3, 2, 1]
+    title: "Print Control"
+    widgets:
+      - print_start_btn
+      - print_pause_btn
+      - print_resume_btn
+      - print_cancel_btn
+
+widgets:
+  printer_status:
+    type: "text_display"
+    label: "Status"
+    source: "printer.status"
+    refresh: 1
+
+  temperature_display:
+    type: "temperature_gauge"
+    extruder_0: "extruder0.temperature"
+    extruder_1: "extruder1.temperature"
+    bed: "heater_bed.temperature"
+
+  print_progress:
+    type: "progress_bar"
+    label: "Print Progress"
+    value: "virtual_sdcard.progress"
+    format: "{:.1%}"
+
+  connection_status:
+    type: "status_indicator"
+    label: "Connection"
+    states:
+      - online: "green"
+      - offline: "red"
+      - connecting: "yellow"
+
+  extruder_0_temp:
+    type: "temperature_control"
+    label: "Extruder 1"
+    heater: "extruder0"
+    min_temp: 0
+    max_temp: 300
+
+  extruder_0_speed:
+    type: "slider"
+    label: "E1 Speed %"
+    gcode: "SET_GCODE_OFFSET Z_ADJUST={value}"
+    min: 10
+    max: 150
+    step: 5
+
+  extruder_1_temp:
+    type: "temperature_control"
+    label: "Extruder 2"
+    heater: "extruder1"
+    min_temp: 0
+    max_temp: 300
+
+  extruder_1_speed:
+    type: "slider"
+    label: "E2 Speed %"
+    gcode: "SET_GCODE_OFFSET Z_ADJUST={value}"
+    min: 10
+    max: 150
+    step: 5
+
+  extruder_selector:
+    type: "button_group"
+    label: "Active Extruder"
+    buttons:
+      - name: "E1"
+        gcode: "T0"
+      - name: "E2"
+        gcode: "T1"
+      - name: "All"
+        gcode: "T2"
+
+  filament_runout_status:
+    type: "status_indicator"
+    label: "Filament Status"
+    states:
+      - loaded: "green"
+      - runout: "red"
+      - low: "yellow"
+
+  bed_temperature:
+    type: "temperature_control"
+    label: "Bed Temperature"
+    heater: "heater_bed"
+    min_temp: 0
+    max_temp: 110
+
+  nozzle_heater_status:
+    type: "status_display"
+    label: "Nozzle Heater"
+    source: "extruder.heater_power"
+
+  bed_leveling_quick:
+    type: "button"
+    label: "Quick Level"
+    gcode: "BED_MESH_CALIBRATE"
+    confirm: true
+
+  mesh_bed_leveling_toggle:
+    type: "toggle"
+    label: "Mesh Leveling"
+    gcode_on: "BED_MESH_PROFILE LOAD=default"
+    gcode_off: "BED_MESH_CLEAR"
+
+  home_all_btn:
+    type: "button"
+    label: "Home All"
+    gcode: "G28"
+    confirm: true
+
+  home_xy_btn:
+    type: "button"
+    label: "Home XY"
+    gcode: "G28 X Y"
+
+  home_z_btn:
+    type: "button"
+    label: "Home Z"
+    gcode: "G28 Z"
+
+  move_up:
+    type: "button"
+    label: "Move Z Up"
+    gcode: "G91\nG1 Z10 F300"
+
+  move_down:
+    type: "button"
+    label: "Move Z Down"
+    gcode: "G91\nG1 Z-10 F300"
+
+  print_start_btn:
+    type: "button"
+    label: "Start Print"
+    gcode: "RESUME"
+    disabled_when: "print_stats.state != 'paused'"
+
+  print_pause_btn:
+    type: "button"
+    label: "Pause"
+    gcode: "PAUSE"
+    disabled_when: "print_stats.state != 'printing'"
+
+  print_resume_btn:
+    type: "button"
+    label: "Resume"
+    gcode: "RESUME"
+    disabled_when: "print_stats.state != 'paused'"
+
+  print_cancel_btn:
+    type: "button"
+    label: "Cancel"
+    gcode: "CANCEL_PRINT"
+    confirm: true
+    disabled_when: "print_stats.state == 'idle'"
